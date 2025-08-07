@@ -53,13 +53,35 @@ export class InvoiceController {
         throw new AppError('Invalid invoice ID', 400);
       }
 
-      const invoice = await invoiceService.getInvoiceById(invoiceId);
+      const invoice = await invoiceService.getInvoice(invoiceId);
       
-      res.json({
+      res.status(200).json({
         status: 'success',
         data: {
           invoice,
         },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getInvoices(req: Request, res: Response, next: NextFunction) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const search = (req.query.search as string) || '';
+
+      const result = await invoiceService.getInvoices({
+        page,
+        limit,
+        search,
+      });
+      
+      res.status(200).json({
+        status: 'success',
+        data: result.data,
+        pagination: result.pagination,
       });
     } catch (error) {
       next(error);

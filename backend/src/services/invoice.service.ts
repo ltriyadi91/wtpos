@@ -1,12 +1,22 @@
-import { PaymentType } from '@prisma/client';
+import { PaymentType, Invoice, InvoiceItem } from '@prisma/client';
 import invoiceRepository from '../repositories/invoice.repository';
 import productService from './product.service';
 import { AppError } from '../middlewares/error.middleware';
+
+interface InvoiceWithItems extends Invoice {
+  items: (InvoiceItem & { product?: any })[];
+}
 
 interface InvoiceItemInput {
   productId: number;
   quantity: number;
   unitPrice: number;
+}
+
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+  search?: string;
 }
 
 export class InvoiceService {
@@ -69,6 +79,40 @@ export class InvoiceService {
       throw new AppError('Invoice not found', 404);
     }
     return invoice;
+  }
+
+  async getInvoice(id: number): Promise<InvoiceWithItems> {
+    const invoice = await invoiceRepository.findById(id);
+    if (!invoice) {
+      throw new AppError('Invoice not found', 404);
+    }
+    return invoice;
+  }
+
+  async getInvoices({ page = 1, limit = 10, search = '' }: PaginationParams) {
+    // Ensure page and limit are valid numbers
+    const pageNumber = Math.max(1, Number(page) || 1);
+    const limitNumber = Math.min(100, Math.max(1, Number(limit) || 10)); // Cap at 100 items per page
+
+    const { invoices, total } = await invoiceRepository.getInvoices(
+      pageNumber,
+      limitNumber,
+      search
+    );
+
+    const totalPages = Math.ceil(total / limitNumber);
+
+    return {
+      data: invoices,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages,
+        totalItems: total,
+        itemsPerPage: limitNumber,
+        hasNextPage: pageNumber < totalPages,
+        hasPreviousPage: pageNumber > 1,
+      },
+    };
   }
 }
 

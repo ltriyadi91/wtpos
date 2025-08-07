@@ -34,6 +34,39 @@ export class InvoiceRepository {
     });
   }
 
+  async getInvoices(page: number = 1, limit: number = 10, search: string = ''): Promise<{ invoices: InvoiceWithItems[], total: number }> {
+    const skip = (page - 1) * limit;
+    
+    const where: Prisma.InvoiceWhereInput = {};
+    
+    if (search) {
+      where.OR = [
+        { invoiceNumber: { contains: search, mode: 'insensitive' } },
+        { customer: { contains: search, mode: 'insensitive' } },
+        { salesPerson: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [invoices, total] = await Promise.all([
+      prisma.invoice.findMany({
+        where,
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.invoice.count({ where }),
+    ]);
+
+    return { invoices, total };
+  }
+
   async generateInvoiceNumber(): Promise<string> {
     const today = new Date();
     const year = today.getFullYear().toString().slice(-2);
