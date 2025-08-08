@@ -1,5 +1,6 @@
+import { productsApi } from '@/lib/api';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { AxiosError } from 'axios';
 
 export interface Product {
   id: number;
@@ -32,10 +33,13 @@ export const searchProducts = createAsyncThunk(
   'products/search',
   async (searchTerm: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/api/products/search?q=${encodeURIComponent(searchTerm)}`);
+      const response = await productsApi.search(searchTerm);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to search products');
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to search products');
+      }
+      return rejectWithValue('An unexpected error occurred while searching products');
     }
   }
 );
@@ -44,10 +48,13 @@ export const fetchProductById = createAsyncThunk(
   'products/fetchById',
   async (productId: number, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/api/products/${productId}`);
+      const response = await productsApi.getById(productId);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch product');
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to fetch product');
+      }
+      return rejectWithValue('An unexpected error occurred while fetching the product');
     }
   }
 );
