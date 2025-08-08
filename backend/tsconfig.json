@@ -3,19 +3,19 @@
     "target": "es2018",
     "module": "commonjs",
     "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@prisma/client": ["./prisma/app/generated/prisma/client"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "prisma/**/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
