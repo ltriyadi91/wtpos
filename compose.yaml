@@ -1,4 +1,32 @@
 services:
+  db:
+    container_name: wtpos_db
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - 5632:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    container_name: backend
+    image: backend
+    build:
+      context: ./backend
+      dockerfile: be.dockerfile
+      args:
+        - DATABASE_URL=postgresql://postgres:postgres@localhost:5632/postgres?schema=public
+    depends_on:
+      - db
+    ports:
+      - 4000:4000
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@localhost:5632/postgres?schema=public
+
   frontend:
     container_name: frontend
     image: frontend
@@ -12,28 +40,6 @@ services:
     restart: always
     depends_on:
       - backend
-  backend:
-    container_name: backend
-    image: backend
-    build:
-      context: ./backend
-      dockerfile: be.dockerfile
-    ports:
-      - 4000:4000
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5632/postgres?schema=public
-  db:
-    container_name: wtpos_db
-    image: postgres:12
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - 5632:5432
-    volumes:
-      - pgdata:/var/lib/postgresql/data
 
 volumes:
   pgdata: {}
