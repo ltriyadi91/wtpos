@@ -1,7 +1,8 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { invoicesApi } from "@/lib/api";
+import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from 'axios';
 
-interface Product {
+export interface Product {
   id: number;
   name: string;
   price: number;
@@ -9,7 +10,7 @@ interface Product {
   image: string;
 }
 
-interface InvoiceItem {
+export interface InvoiceItem {
   productId: number;
   product: Product;
   quantity: number;
@@ -17,47 +18,68 @@ interface InvoiceItem {
   totalPrice: number;
 }
 
-interface InvoiceState {
+export interface InvoiceState {
   items: InvoiceItem[];
   customer: string;
   salesPerson: string;
   notes: string;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  paymentType: string;
+  status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+}
+
+export interface InvoiceData {
+  items: InvoiceItem[];
+  customer: string;
+  salesPerson: string;
+  notes: string;
+  paymentType: string;
 }
 
 const initialState: InvoiceState = {
   items: [],
-  customer: '',
-  salesPerson: '',
-  notes: '',
-  status: 'idle',
+  customer: "",
+  salesPerson: "",
+  notes: "",
+  paymentType: "CASH",
+  status: "idle",
   error: null,
 };
 
 export const createInvoice = createAsyncThunk(
-  'invoices/createInvoice',
-  async (invoiceData: Omit<InvoiceState, 'status' | 'error'>, { rejectWithValue }) => {
+  "invoices/createInvoice",
+  async (invoiceData: InvoiceData, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/invoices', invoiceData);
+      const response = await invoicesApi.create(invoiceData);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create invoice');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(
+          error.response?.data?.message || "Failed to create invoice"
+        );
+      }
+      return rejectWithValue("An unexpected error occurred");
     }
   }
 );
 
 const invoiceSlice = createSlice({
-  name: 'invoice',
+  name: "invoice",
   initialState,
   reducers: {
-    addItem: (state, action: PayloadAction<{ product: Product; quantity: number }>) => {
+    addItem: (
+      state,
+      action: PayloadAction<{ product: Product; quantity: number }>
+    ) => {
       const { product, quantity } = action.payload;
-      const existingItem = state.items.find(item => item.productId === product.id);
+      const existingItem = state.items.find(
+        (item) => item.productId === product.id
+      );
 
       if (existingItem) {
         existingItem.quantity += quantity;
-        existingItem.totalPrice = existingItem.quantity * existingItem.unitPrice;
+        existingItem.totalPrice =
+          existingItem.quantity * existingItem.unitPrice;
       } else {
         state.items.push({
           productId: product.id,
@@ -68,17 +90,22 @@ const invoiceSlice = createSlice({
         });
       }
     },
-    updateItemQuantity: (state, action: PayloadAction<{ productId: number; quantity: number }>) => {
+    updateItemQuantity: (
+      state,
+      action: PayloadAction<{ productId: number; quantity: number }>
+    ) => {
       const { productId, quantity } = action.payload;
-      const item = state.items.find(item => item.productId === productId);
-      
+      const item = state.items.find((item) => item.productId === productId);
+
       if (item) {
         item.quantity = quantity;
         item.totalPrice = item.quantity * item.unitPrice;
       }
     },
     removeItem: (state, action: PayloadAction<number>) => {
-      state.items = state.items.filter(item => item.productId !== action.payload);
+      state.items = state.items.filter(
+        (item) => item.productId !== action.payload
+      );
     },
     setCustomer: (state, action: PayloadAction<string>) => {
       state.customer = action.payload;
@@ -94,14 +121,13 @@ const invoiceSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(createInvoice.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
-      .addCase(createInvoice.fulfilled, (state) => {
-        state.status = 'succeeded';
+      .addCase(createInvoice.fulfilled, () => {
         return initialState; // Reset to initial state on success
       })
       .addCase(createInvoice.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.payload as string;
       });
   },
@@ -117,7 +143,8 @@ export const {
   clearInvoice,
 } = invoiceSlice.actions;
 
-export const selectInvoiceItems = (state: { invoice: InvoiceState }) => state.invoice.items;
+export const selectInvoiceItems = (state: { invoice: InvoiceState }) =>
+  state.invoice.items;
 export const selectInvoiceTotal = (state: { invoice: InvoiceState }) =>
   state.invoice.items.reduce((total, item) => total + item.totalPrice, 0);
 
