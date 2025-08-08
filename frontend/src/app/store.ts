@@ -1,6 +1,6 @@
-import { configureStore } from '@reduxjs/toolkit';
-import invoiceReducer from '../features/invoice/invoiceSlice';
-import productReducer from '../features/products/productSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import invoiceReducer from "@/features/invoice/invoiceSlice";
+import productReducer from "@/features/products/productSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,11 +11,11 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types
-        ignoredActions: ['your/action/type'],
+        ignoredActions: ["your/action/type"],
         // Ignore these field paths in all actions
-        ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
+        ignoredActionPaths: ["meta.arg", "payload.timestamp"],
         // Ignore these paths in the state
-        ignoredPaths: ['items.dates'],
+        ignoredPaths: ["items.dates"],
       },
     }),
 });
