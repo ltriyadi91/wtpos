@@ -2,28 +2,43 @@ FROM node:20
 
 WORKDIR /app
 
-# Accept build arguments
-ARG DATABASE_URL
-
-# Set environment variables
-ENV DATABASE_URL=${DATABASE_URL}
-
-COPY package*.json pnpm-lock.yaml* ./
+# Install pnpm
 RUN npm install -g pnpm
+
+# Copy package files
+COPY package*.json pnpm-lock.yaml* ./
+
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-RUN pnpm install
-
+# Copy Prisma schema
 COPY prisma ./prisma
 
-# Only run migrations if DATABASE_URL is provided during build
-RUN if [ -n "$DATABASE_URL" ]; then npx prisma generate; fi
+# Generate Prisma client
+RUN npx prisma generate
 
-# Only run seed if DATABASE_URL is provided during build
-RUN if [ -n "$DATABASE_URL" ]; then npx prisma migrate reset; fi
-
+# Copy application code
 COPY . .
+
+# Create entrypoint script
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo '' >> /app/entrypoint.sh && \
+    echo '# Wait for database to be ready' >> /app/entrypoint.sh && \
+    echo 'echo "Waiting for database to be ready..."' >> /app/entrypoint.sh && \
+    echo 'until npx prisma db execute --stdin --url "$DATABASE_URL" -- echo "Database ready" 2>/dev/null; do' >> /app/entrypoint.sh && \
+    echo '  echo "Still waiting for database..."' >> /app/entrypoint.sh && \
+    echo '  sleep 2' >> /app/entrypoint.sh && \
+    echo 'done' >> /app/entrypoint.sh && \
+    echo '' >> /app/entrypoint.sh && \
+    echo '# Run migrations' >> /app/entrypoint.sh && \
+    echo 'npx prisma migrate deploy' >> /app/entrypoint.sh && \
+    echo 'npx prisma db seed' >> /app/entrypoint.sh && \
+    echo '' >> /app/entrypoint.sh && \
+    echo '# Start the application' >> /app/entrypoint.sh && \
+    echo 'exec "$@"' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
 
 EXPOSE 4000
 
-CMD ["node", "server.js"]
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["pnpm", "dev"]
