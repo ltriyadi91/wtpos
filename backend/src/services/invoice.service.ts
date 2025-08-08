@@ -35,13 +35,29 @@ export class InvoiceService {
       )
     ]);
 
+    // Check for sufficient stock before creating the invoice
+    items.map((item, idx) =>  {
+      const product = products[idx];
+
+      if (!product) {
+        throw new AppError(`Product with ID ${item.productId} not found.`, 404);
+      }
+
+      if (product.stock < item.quantity) {
+        throw new AppError(
+          `Insufficient stock for product "${product.name}". Only ${product.stock} left in stock.`,
+          400
+        );
+      }
+    })
+
     // Calculate total amount
     const totalAmount = items.reduce((sum, item) => {
       return sum + (item.quantity * item.unitPrice);
     }, 0);
 
     // Prepare invoice items
-    const invoiceItems = items.map((item, index) => ({
+    const invoiceItems = items.map(item => ({
       productId: item.productId,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
@@ -113,6 +129,15 @@ export class InvoiceService {
         hasPreviousPage: pageNumber > 1,
       },
     };
+  }
+
+  async getRevenue(range: 'day' | 'week' | 'month') {
+    const revenueData = await invoiceRepository.getRevenueData(range);
+
+    return revenueData.map(item => ({
+      date: new Date(item.date).toLocaleDateString('en-CA'), // 'en-CA' gives YYYY-MM-DD format
+      revenue: Number(item.revenue),
+    }));
   }
 }
 

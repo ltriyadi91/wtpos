@@ -87,6 +87,26 @@ export class InvoiceController {
       next(error);
     }
   }
+
+  async getRevenue(req: Request, res: Response, next: NextFunction) {
+    console.log({ req })
+    try {
+      const range = req.query.range as 'day' | 'week' | 'month' || 'day';
+
+      if (!['day', 'week', 'month'].includes(range)) {
+        throw new AppError('Invalid range parameter. Use day, week, or month.', 400);
+      }
+
+      const revenueData = await invoiceService.getRevenue(range);
+
+      res.status(200).json({
+        status: 'success',
+        data: revenueData,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new InvoiceController();

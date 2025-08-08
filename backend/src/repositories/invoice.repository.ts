@@ -9,12 +9,7 @@ interface InvoiceWithItems extends Invoice {
 export class InvoiceRepository {
   async create(data: Prisma.InvoiceCreateInput): Promise<InvoiceWithItems> {
     return prisma.invoice.create({
-      data: {
-        ...data,
-        items: {
-          create: (data as any).items,
-        },
-      },
+      data,
       include: {
         items: true,
       },
@@ -84,6 +79,41 @@ export class InvoiceRepository {
     }
 
     return `INV-${year}${month}-${String(sequence).padStart(4, '0')}`;
+  }
+
+  async getRevenueData(range: 'day' | 'week' | 'month'): Promise<any[]> {
+    let query: Prisma.Sql;
+
+    switch (range) {
+      case 'day':
+        query = Prisma.sql`
+          SELECT DATE_TRUNC('day', "date") as date, SUM("totalAmount") as revenue
+          FROM "Invoice"
+          GROUP BY date
+          ORDER BY date ASC
+        `;
+        break;
+      case 'week':
+        query = Prisma.sql`
+          SELECT DATE_TRUNC('week', "date") as date, SUM("totalAmount") as revenue
+          FROM "Invoice"
+          GROUP BY date
+          ORDER BY date ASC
+        `;
+        break;
+      case 'month':
+        query = Prisma.sql`
+          SELECT DATE_TRUNC('month', "date") as date, SUM("totalAmount") as revenue
+          FROM "Invoice"
+          GROUP BY date
+          ORDER BY date ASC
+        `;
+        break;
+      default:
+        throw new Error('Invalid range type');
+    }
+
+    return prisma.$queryRaw(query);
   }
 }
 
