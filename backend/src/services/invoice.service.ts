@@ -79,7 +79,6 @@ export class InvoiceService {
       },
     });
 
-    // Update product stocks
     await Promise.all(
       items.map(item => 
         productService.updateStock(item.productId, item.quantity)
@@ -106,9 +105,8 @@ export class InvoiceService {
   }
 
   async getInvoices({ page = 1, limit = 10, search = '' }: PaginationParams) {
-    // Ensure page and limit are valid numbers
     const pageNumber = Math.max(1, Number(page) || 1);
-    const limitNumber = Math.min(100, Math.max(1, Number(limit) || 10)); // Cap at 100 items per page
+    const limitNumber = Math.min(100, Math.max(1, Number(limit) || 10));
 
     const { invoices, total } = await invoiceRepository.getInvoices(
       pageNumber,
@@ -135,7 +133,7 @@ export class InvoiceService {
     const revenueData = await invoiceRepository.getRevenueData(range);
 
     return revenueData.map(item => ({
-      date: new Date(item.date).toLocaleDateString('en-CA'), // 'en-CA' gives YYYY-MM-DD format
+      date: new Date(item.date).toDateString(),
       revenue: Number(item.revenue),
     }));
   }
