@@ -28,6 +28,7 @@ export function ProductList({ products, status, onAddProduct }: ProductListProps
           <Stack gap="xs">
             {products.map((product) => (
               <ProductListItem
+                disabled={product.stock < 1}
                 key={product.id}
                 product={product}
                 onAddProduct={onAddProduct}

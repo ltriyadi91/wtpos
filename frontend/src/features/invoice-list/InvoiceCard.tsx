@@ -2,8 +2,9 @@
 
 import { Accordion } from "@mantine/core";
 import { Invoice } from "@/types/invoice";
-import InvoiceCardHeader from "./invoice-card/InvoiceCardHeader";
-import InvoiceCardPanel from "./invoice-card/InvoiceCardPanel";
+
+import InvoiceCardHeader from "./InvoiceCardHeader";
+import InvoiceCardPanel from "./InvoiceCardPanel";
 
 interface InvoiceCardProps {
   invoice: Invoice;

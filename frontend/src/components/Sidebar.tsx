@@ -1,6 +1,6 @@
 "use client";
 import { NavLink } from '@mantine/core';
-import { IconLayoutDashboard, IconFileInvoice, IconChartLine } from '@tabler/icons-react';
+import { IconLayoutDashboard, IconFileInvoice } from '@tabler/icons-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 

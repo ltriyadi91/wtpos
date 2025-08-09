@@ -10,7 +10,7 @@ import {
 import { IconPlus } from "@tabler/icons-react";
 import Link from "next/link";
 import api from "@/lib/api";
-import InvoiceList from "@/components/invoices/InvoiceList";
+import InvoiceList from "@/features/invoice-list/InvoiceList";
 import { Invoice } from "@/types/invoice";
 
 interface ApiResponse {

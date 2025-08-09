@@ -9,17 +9,30 @@ import {
   NumberFormatter,
 } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-import { Product } from "@/features/products/productSlice";
+import { Product } from "@/slices/productSlice";
 
 interface ProductListItemProps {
   product: Product;
+  disabled: boolean;
   onAddProduct: (product: Product) => void;
 }
 
 export function ProductListItem({
   product,
   onAddProduct,
+  disabled,
 }: ProductListItemProps) {
+
+  const handleAddProduct = () => {
+    if (disabled) return;
+    onAddProduct(product);
+  };
+
+  const handleIconClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    onAddProduct(product);
+  };
+
   return (
     <Paper
       p="sm"
@@ -27,7 +40,7 @@ export function ProductListItem({
       style={{
         cursor: "pointer",
       }}
-      onClick={() => onAddProduct(product)}
+      onClick={handleAddProduct}
     >
       <Group justify="space-between" wrap="nowrap">
         <Flex gap="sm" align="center">
@@ -51,16 +64,18 @@ export function ProductListItem({
         </Flex>
         <Group gap="xs" wrap="nowrap">
           <Text fw={700}>
-            <NumberFormatter value={product.price} prefix="$" thousandSeparator />
+            <NumberFormatter
+              value={product.price}
+              prefix="$"
+              thousandSeparator
+            />
           </Text>
           <ActionIcon
+            disabled={disabled}
             variant="light"
             color="blue"
             size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddProduct(product);
-            }}
+            onClick={handleIconClick}
           >
             <IconPlus size={16} />
           </ActionIcon>

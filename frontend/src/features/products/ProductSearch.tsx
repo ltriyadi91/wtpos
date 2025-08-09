@@ -8,10 +8,11 @@ import {
   selectAllProducts,
   selectProductStatus,
   Product,
-} from "./productSlice";
-import { addItem } from "../invoice/invoiceSlice";
-import { ProductSearchInput } from "../../components/products/ProductSearchInput";
-import { ProductList } from "../../components/products/ProductList";
+} from "@/slices/productSlice";
+import { addItem } from "@/slices/invoiceSlice";
+
+import { ProductSearchInput } from "./ProductSearchInput";
+import { ProductList } from "./ProductList";
 
 export function ProductSearch() {
   const dispatch = useAppDispatch();

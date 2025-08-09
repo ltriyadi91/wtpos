@@ -3,7 +3,7 @@ import { Container, Title } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { Provider } from "react-redux";
 import { store } from "@/app/store";
-import { InvoiceForm } from "@/features/invoice/InvoiceForm";
+import { InvoiceForm } from "@/features/invoice-creation/InvoiceForm";
 
 export default function NewInvoicePage() {
   return (

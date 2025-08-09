@@ -4,14 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Title, Grid, Select, Group } from "@mantine/core";
 
 import { invoicesApi } from "@/lib/api";
-import StatCard from "@/components/dashboard/StatCard";
-import RevenueChart, { RevenueData } from "@/components/dashboard/RevenueChart";
+import StatCard from "@/features/dashboard/StatCard";
+import RevenueChart from "@/features/dashboard/RevenueChart";
 
 const timeRanges = [
   { value: "day", label: "Daily" },
   { value: "week", label: "Weekly" },
   { value: "month", label: "Monthly" },
 ];
+
+type RevenueData = {
+  date: string;
+  revenue: number;
+};
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState("day");

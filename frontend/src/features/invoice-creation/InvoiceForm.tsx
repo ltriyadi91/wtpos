@@ -17,10 +17,11 @@ import {
   InvoiceData,
   selectInvoiceItems,
   selectInvoiceTotal,
-} from "./invoiceSlice";
+} from "@/slices/invoiceSlice";
+
 import { ProductSearch } from "../products/ProductSearch";
-import { CustomerForm } from "../../components/invoices/CustomerForm";
-import { InvoiceItemsTable } from "../../components/invoices/InvoiceItemsTable";
+import { CustomerForm } from "./CustomerForm";
+import { InvoiceProducts } from "./InvoiceProducts";
 
 export function InvoiceForm() {
   const dispatch = useAppDispatch();
@@ -109,7 +110,7 @@ export function InvoiceForm() {
             <ProductSearch />
           </Box>
 
-          <InvoiceItemsTable items={items} total={total} />
+          <InvoiceProducts items={items} total={total} />
         </Paper>
 
         <Group justify="flex-end">

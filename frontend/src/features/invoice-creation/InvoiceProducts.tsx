@@ -17,14 +17,14 @@ import {
   removeItem,
   updateItemQuantity,
   InvoiceItem,
-} from "@/features/invoice/invoiceSlice";
+} from "@/slices/invoiceSlice";
 
-interface InvoiceItemsTableProps {
+interface InvoiceProductsProps {
   items: InvoiceItem[];
   total: number;
 }
 
-export function InvoiceItemsTable({ items, total }: InvoiceItemsTableProps) {
+export function InvoiceProducts({ items, total }: InvoiceProductsProps) {
   const dispatch = useAppDispatch();
 
   const rows = items.map((item) => (
